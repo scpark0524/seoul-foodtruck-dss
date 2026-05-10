@@ -122,3 +122,13 @@
 2026-05-10 23:42:58,997 [INFO]    weather                   | 신규     1행 | 누적      1행 | 30컬럼
 2026-05-10 23:42:58,997 [INFO] 키별 사용량:
 2026-05-10 23:42:58,997 [INFO]    🟢 KEY_1 (1/1000) 
+2026-05-10 23:59:44,904 [INFO] 등록된 키: 2개, 합산 한도 2,000건/일
+2026-05-10 23:59:44,905 [INFO] === 키 점검 (2개) ===
+2026-05-10 23:59:44,905 [INFO] 
+[KEY_1] 광화문·덕수궁 호출 시도
+2026-05-10 23:59:46,775 [INFO]   ✅ KEY_1 정상 | 받은 카테고리 12개: ['area_meta', 'bike_sbike_stts', 'bus_bus_stn_stts', 'charger_charger_stts', 'cmrcl', 'events_event_stts', 'parking_prk_stts', 'ppltn', 'road', 'road_road_traffic_stts', 'subway_sub_stts', 'weather']
+2026-05-10 23:59:46,775 [INFO] 
+[KEY_2] 광화문·덕수궁 호출 시도
+2026-05-10 23:59:48,608 [INFO]   ✅ KEY_2 정상 | 받은 카테고리 12개: ['area_meta', 'bike_sbike_stts', 'bus_bus_stn_stts', 'charger_charger_stts', 'cmrcl', 'events_event_stts', 'parking_prk_stts', 'ppltn', 'road', 'road_road_traffic_stts', 'subway_sub_stts', 'weather']
+2026-05-10 23:59:48,608 [INFO] 
+키 풀: 2/2 활성 | 오늘 사용 2/2000건
