@@ -1,0 +1,7 @@
+requests>=2.31
+pandas>=2.0
+python-dotenv>=1.0
+xmltodict>=0.13
+openpyxl>=3.1
+# pyarrow는 다른 데이터(매출 등) 처리 시 필요. 실시간 수집(CSV)만 쓰면 생략 가능.
+pyarrow>=14.0

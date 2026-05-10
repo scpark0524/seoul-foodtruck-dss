@@ -1,0 +1,28 @@
+# 환경변수 (API 키)
+scripts/.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# 큰 데이터/처리물 — 일단 ignore (나중에 필요시 해제)
+processed/
+raw/*
+
+# 단, GitHub Actions로 모으는 실시간 데이터는 commit 허용
+!raw/realtime/
+!raw/realtime/**
+
+# 백업 폴더 (실수로 push 방지)
+raw/realtime_v2_backup/
+raw/realtime/_*.bak
+
+# 로그도 commit 허용 (Actions 모니터링용)
+!logs/
+!logs/*.log
