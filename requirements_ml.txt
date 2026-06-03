@@ -1,0 +1,24 @@
+# ============================================
+# 푸드트럭 DSS — ML 파이프라인 (Slim Edition)
+# 설치:
+#   pip install -r requirements_ml.txt
+# Python 3.11 또는 3.12 권장. 3.14 는 일부 패키지 wheel 미지원 가능.
+# ============================================
+
+# 기본 데이터 처리
+numpy>=1.26
+pandas>=2.1
+pyarrow>=14.0       # parquet 저장/로드
+
+# 머신러닝
+scikit-learn>=1.4
+xgboost>=2.0
+
+# 모델 해석 (XAI)
+shap>=0.44
+
+# 시각화 — matplotlib 만 사용 (seaborn 의존 없음)
+matplotlib>=3.8
+
+# 노트북 (VSCode Jupyter)
+ipykernel>=6.27

@@ -11,18 +11,26 @@ venv/
 .DS_Store
 Thumbs.db
 
-# 큰 데이터/처리물 — 일단 ignore (나중에 필요시 해제)
+# 큰 데이터/처리물
 processed/
 raw/*
 
-# 단, GitHub Actions로 모으는 실시간 데이터는 commit 허용
+# GitHub Actions로 모으는 실시간 데이터는 commit 허용
 !raw/realtime/
 !raw/realtime/**
-
-# 백업 폴더 (실수로 push 방지)
 raw/realtime_v2_backup/
-raw/realtime/_*.bak
 
-# 로그도 commit 허용 (Actions 모니터링용)
+# 로그 commit 허용 (Actions 모니터링)
 !logs/
 !logs/*.log
+
+# === 대용량/빌드 산출물 (repo에 올리지 않음) ===
+# 공공 원본 3.5GB — 열린데이터광장에서 재다운로드
+backtest_data/
+data/
+# 모델 바이너리 (notebooks/06 실행으로 재생성)
+models/
+
+# 백업/잡파일
+*.bak
+test_write.txt

@@ -1,0 +1,45 @@
+{
+  "step1_baseline": {
+    "n_features": 106,
+    "spatial_cv_r2": 0.6963,
+    "folds": [
+      0.7051,
+      0.688,
+      0.6959
+    ],
+    "frac": 0.4,
+    "params": "n_est200,depth7,lr0.08"
+  },
+  "step2_prune_top40": {
+    "n_features": 40,
+    "spatial_cv_r2": 0.6931,
+    "folds": [
+      0.7007,
+      0.685,
+      0.6937
+    ]
+  },
+  "step3_tuned_top40": {
+    "n_features": 40,
+    "spatial_cv_r2": 0.7053,
+    "folds": [
+      0.7203,
+      0.6937,
+      0.7019
+    ],
+    "frac": 0.3,
+    "params": "d8,lr.03,n700,mcw10"
+  },
+  "step4_derived": {
+    "top40_split": 0.7203,
+    "plus_derived_split": 0.7164,
+    "delta": -0.0039,
+    "added": [
+      "d_comp_per_pop",
+      "d_store_dens_pop",
+      "d_food_spend_pop",
+      "d_food_pop",
+      "d_cat_weekend"
+    ]
+  }
+}

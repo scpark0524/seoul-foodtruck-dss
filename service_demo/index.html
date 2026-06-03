@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>푸드트럭 입지 DSS — 요일별 추천메뉴 & 일 예상매출</title>
+<style>
+  :root{--bg:#0f1216;--card:#1a1f27;--line:#2a313c;--txt:#e8edf3;--sub:#9aa7b6;--accent:#16a085;}
+  *{box-sizing:border-box;font-family:-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;}
+  body{margin:0;background:var(--bg);color:var(--txt);padding:26px 16px;}
+  .wrap{max-width:940px;margin:0 auto;}
+  h1{font-size:21px;margin:0 0 4px;} .sub{color:var(--sub);font-size:13px;margin-bottom:16px;}
+  .days{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;}
+  .day{padding:8px 14px;border:1px solid var(--line);border-radius:20px;background:#11151b;
+    color:var(--sub);cursor:pointer;font-size:14px;user-select:none;}
+  .day.on{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700;}
+  .day.we.on{background:#e74c3c;border-color:#e74c3c;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media(max-width:720px){.grid{grid-template-columns:1fr;}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;}
+  .card h2{font-size:15px;margin:0 0 12px;}
+  select,input{width:100%;padding:10px 12px;background:#11151b;border:1px solid var(--line);
+    border-radius:9px;color:var(--txt);font-size:14px;margin-bottom:12px;}
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  th,td{text-align:left;padding:9px 6px;border-bottom:1px solid var(--line);}
+  th{color:var(--sub);font-weight:600;font-size:12px;} td.num{text-align:right;font-variant-numeric:tabular-nums;}
+  .rk{display:inline-flex;width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;
+    align-items:center;justify-content:center;font-size:12px;font-weight:700;}
+  .rk.gold{background:#f1c40f;color:#222}.rk.silver{background:#bdc3c7;color:#222}.rk.bronze{background:#cd7f32}
+  .big{font-size:13px;color:var(--sub);margin:14px 0 4px;} .hl{color:var(--accent);font-weight:700;}
+  .bar{height:6px;background:var(--accent);border-radius:3px;margin-top:4px;}
+  .foot{color:var(--sub);font-size:11px;margin-top:18px;line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🚚 푸드트럭 입지 DSS — 요일별 추천메뉴 & 일 예상매출</h1>
+  <div class="sub">서울 425개 행정동 · 10개 업종 · 일자 XGBoost(self-lag 없음) · 요일/계절 반영</div>
+  <div class="days" id="days"></div>
+  <div class="grid">
+    <div class="card">
+      <h2>📍 입지로 찾기 — 추천 메뉴 & 일 예상매출</h2>
+      <input id="dongSearch" placeholder="행정동 검색 (예: 역삼, 명동)"/>
+      <select id="dongSel"></select>
+      <div id="dongOut"></div>
+    </div>
+    <div class="card">
+      <h2>🍳 메뉴로 찾기 — 요일별 최적 입지 Top 10</h2>
+      <select id="catSel"></select>
+      <div id="catOut"></div>
+    </div>
+  </div>
+  <div class="foot">
+    * 예상매출 = 선택 요일의 <b>일</b> 예상매출(백만원). 입지속성+요일·계절+일별 외부(기상·공휴일·생활인구)로 예측.
+    self-lag 없어 신규 후보지도 점수화. 공간검증(안 본 행정동) 기준 일반화 성능 확인됨.<br/>
+    * 실시간(citydata) 누적분은 행정동으로 변환되어(scripts/realtime_to_dong.py) 현황·재학습에 연계.
+  </div>
+</div>
+<script src="predictions_daily.js"></script>
+<script>
+const D=window.PRED; let WD=D.weekdays.includes("금")?"금":D.weekdays[0];
+const daysEl=document.getElementById('days'),dongSel=document.getElementById('dongSel'),
+      catSel=document.getElementById('catSel'),dongOut=document.getElementById('dongOut'),
+      catOut=document.getElementById('catOut'),search=document.getElementById('dongSearch');
+function curDay(){return D.byday[WD];}
+function dongList(){const o=curDay();return Object.keys(o).map(c=>({code:c,name:o[c].name}));}
+function fmt(n){return n.toLocaleString('ko-KR',{maximumFractionDigits:0});}
+const rkC=i=>i===0?'gold':i===1?'silver':i===2?'bronze':'';
+function renderDays(){
+  daysEl.innerHTML='';
+  D.weekdays.forEach(w=>{const b=document.createElement('div');
+    b.className='day'+((w==='토'||w==='일')?' we':'')+(w===WD?' on':'');
+    b.textContent=w;b.onclick=()=>{WD=w;renderDays();renderDong();renderCat();};daysEl.appendChild(b);});
+}
+function fillDongs(f=''){
+  const list=dongList().filter(d=>d.name.includes(f)).slice(0,500);
+  dongSel.innerHTML=''; list.forEach(d=>{const o=document.createElement('option');
+    o.value=d.code;o.textContent=`${d.name} (${d.code})`;dongSel.appendChild(o);});
+  renderDong();
+}
+function renderDong(){
+  const o=curDay()[dongSel.value]; if(!o)return;
+  const ms=[...o.menus].sort((a,b)=>b.sales_mil-a.sales_mil); const mx=ms[0].sales_mil;
+  let h=`<div class="big">📊 <span class="hl">${o.name}</span> · <b>${WD}요일</b> 업종별 일 예상매출</div>
+    <table><tr><th>순위</th><th>추천 메뉴</th><th class="num">일 예상매출(백만)</th></tr>`;
+  ms.forEach((m,i)=>{h+=`<tr><td><span class="rk ${rkC(i)}">${i+1}</span></td><td>${m.category}
+    <div class="bar" style="width:${Math.max(4,m.sales_mil/mx*100)}%"></div></td><td class="num">${fmt(m.sales_mil)}</td></tr>`;});
+  dongOut.innerHTML=h+'</table>';
+}
+function renderCat(){
+  const c=catSel.value, o=curDay();
+  const rows=Object.keys(o).map(code=>({name:o[code].name,v:(o[code].menus.find(m=>m.category===c)||{}).sales_mil||0}))
+    .sort((a,b)=>b.v-a.v).slice(0,10); const mx=rows[0].v;
+  let h=`<div class="big">🏆 <span class="hl">${c}</span> · <b>${WD}요일</b> 최적입지</div>
+    <table><tr><th>순위</th><th>행정동</th><th class="num">일 예상매출(백만)</th></tr>`;
+  rows.forEach((r,i)=>{h+=`<tr><td><span class="rk ${rkC(i)}">${i+1}</span></td><td>${r.name}
+    <div class="bar" style="width:${Math.max(4,r.v/mx*100)}%"></div></td><td class="num">${fmt(r.v)}</td></tr>`;});
+  catOut.innerHTML=h+'</table>';
+}
+D.categories.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent=c;catSel.appendChild(o);});
+search.addEventListener('input',e=>fillDongs(e.target.value));
+dongSel.addEventListener('change',renderDong);
+catSel.addEventListener('change',renderCat);
+renderDays(); fillDongs(); renderCat();
+</script>
+</body>
+</html>
